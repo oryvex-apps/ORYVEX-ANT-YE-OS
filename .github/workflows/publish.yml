@@ -21,11 +21,19 @@ jobs:
       - name: Checkout publish repo
         uses: actions/checkout@v4
 
+      - name: Resolve latest ORYVEX source main
+        id: source
+        run: |
+          SHA=$(git ls-remote https://github.com/oryvex-systems/ofclskan-oryvex-os.git refs/heads/main | awk '{print $1}')
+          test -n "$SHA"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Resolved ORYVEX source SHA: $SHA"
+
       - name: Checkout ORYVEX source
         uses: actions/checkout@v4
         with:
           repository: oryvex-systems/ofclskan-oryvex-os
-          ref: main
+          ref: ${{ steps.source.outputs.sha }}
           path: oryvex-source
 
       - name: Assemble site
@@ -74,7 +82,7 @@ jobs:
       - name: Validate app surface
         run: |
           set -euo pipefail
-          required=(404.html index.html giris.html modul.html proje-detay.html kullanicilar.html sistem-kontrol.html merkez.html operasyon.html yonetim.html finans.html nakit-akis.html depo-evrak.html raporlar.html yonetici.html ayarlar.html hareketler.html https-redirect.js global-nav.js cashflow-link.js activity-nav.js access-ui.js session-watch.js runtime-fixes.js project-detail-links.js pwa.js service-worker.js manifest.webmanifest oryvex-santiye-icon.svg build.json)
+          required=(404.html index.html giris.html modul.html proje-detay.html kullanicilar.html sistem-kontrol.html merkez.html operasyon.html yonetim.html finans.html nakit-akis.html depo-evrak.html raporlar.html yonetici.html ayarlar.html hareketler.html beton.html beton-core.js cari.html https-redirect.js global-nav.js cashflow-link.js activity-nav.js access-ui.js session-watch.js runtime-fixes.js project-detail-links.js pwa.js service-worker.js manifest.webmanifest oryvex-santiye-icon.svg build.json)
           for f in "${required[@]}"; do
             test -s "publish/$f" || { echo "Missing required screen: $f"; exit 1; }
           done
